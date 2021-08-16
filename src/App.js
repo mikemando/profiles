@@ -1,46 +1,32 @@
-import React from "react";
-import faker from "faker";
-import CommentDetail from "./components/CommentDetail";
-import ApprovalCard from "./components/ApprovalCard";
+import React, { Component } from "react";
+import SeasonDisplay from "./components/SeasonDisplay";
+import Spinner from "./components/Spinner";
 
-const App = () => {
-    return (
-        <div className="ui container comments">
-            <ApprovalCard>
-                <div>
-                    <h4>Warning!</h4>
-                    <br />
-                    Are you sure you want to do this?
-                </div>
-            </ApprovalCard>
-            <ApprovalCard>
-                <CommentDetail
-                    author="Sam"
-                    timeAgo="Today at 4:45PM"
-                    text="Nice blog post!"
-                    avatar={faker.image.avatar()}
-                />
-            </ApprovalCard>
+class App extends Component {
+    state = { lat: null, errorMessage: "" };
 
-            <ApprovalCard>
-                <CommentDetail
-                    author="Alex"
-                    timeAgo="Today at 2:00AM"
-                    text="It was an amazing read."
-                    avatar={faker.image.avatar()}
-                />
-            </ApprovalCard>
+    componentDidMount() {
+        window.navigator.geolocation.getCurrentPosition(
+            (position) => this.setState({ lat: position.coords.latitude }),
+            (err) => this.setState({ errorMessage: err.message })
+        );
+    }
 
-            <ApprovalCard>
-                <CommentDetail
-                    author="Jane"
-                    timeAgo="Yesterday at 5:00PM"
-                    text="Good job man. Thrilled for your next post."
-                    avatar={faker.image.avatar()}
-                />
-            </ApprovalCard>
-        </div>
-    );
-};
+    renderContent() {
+        if (this.state.errorMessage && !this.state.lat) {
+            return <div>Error: {this.state.errorMessage}</div>;
+        }
+
+        if (!this.state.errorMessage && this.state.lat) {
+            return <SeasonDisplay lat={this.state.lat} />;
+        }
+
+        return <Spinner message="Please accept location request" />;
+    }
+
+    render() {
+        return <div className="border red">{this.renderContent()}</div>;
+    }
+}
 
 export default App;
